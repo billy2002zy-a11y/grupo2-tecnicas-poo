@@ -1,0 +1,11 @@
+=========================================
+REPORTE DE INVENTARIO - TIENDITA SANCHEZ
+Fecha: 10/11/2025 15:07
+-----------------------------------------
+Codigo: 123 | Nombre: leche gloria | Precio: 2.5 | Stock: 10 | Subtotal: 25.0
+Codigo: 456 | Nombre: Mortadella | Precio: 1.8 | Stock: 17 | Subtotal: 30.6
+Codigo: 789 | Nombre: gaseosa de 1L | Precio: 8.0 | Stock: 17 | Subtotal: 136.0
+-----------------------------------------
+Valor total del inventario: 191.6
+=========================================
+

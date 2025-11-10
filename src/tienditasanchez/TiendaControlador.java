@@ -15,7 +15,7 @@ public class TiendaControlador
 {
     ArrayList<Producto> lista_productos = new ArrayList();
     ArrayList<Cliente> lista_clientes = new ArrayList();
-
+    
     Scanner sc = new Scanner(System.in);
 
     public void menu()
@@ -73,20 +73,20 @@ public class TiendaControlador
         }
     }
 
-    // ==============================
-    // REGISTRAR PRODUCTO
-    // ==============================
+    
     public void registrarProducto()
     {
         Producto p = new Producto();
 
         System.out.print("ingrese codigo del producto: ");
         String codigo = sc.nextLine();
+
         if(buscarProducto(codigo) != null)
         {
             System.out.println("error: el codigo ya existe");
             return;
         }
+
         p.setCodigo(codigo);
 
         System.out.print("ingrese nombre del producto: ");
@@ -99,12 +99,11 @@ public class TiendaControlador
         p.setStock(Integer.parseInt(sc.nextLine()));
 
         lista_productos.add(p);
+        guardarProductosEnArchivo();
         System.out.println("producto registrado correctamente");
     }
 
-    // ==============================
-    // LISTAR PRODUCTOS
-    // ==============================
+    
     public void listarProductos()
     {
         System.out.println("lista de productos disponibles:");
@@ -114,9 +113,7 @@ public class TiendaControlador
         }
     }
 
-    // ==============================
-    // VENDER PRODUCTO
-    // ==============================
+    
     public void venderProducto()
     {
         System.out.print("buscar producto por (1-codigo / 2-nombre): ");
@@ -175,12 +172,14 @@ public class TiendaControlador
             {
                 cli = new Cliente();
                 cli.setDni(dni);
+
                 System.out.print("ingrese nombre del cliente: ");
                 cli.setNombre(sc.nextLine());
                 System.out.print("ingrese direccion: ");
                 cli.setDireccion(sc.nextLine());
                 System.out.print("ingrese telefono: ");
                 cli.setTelefono(sc.nextLine());
+
                 lista_clientes.add(cli);
             }
 
@@ -192,6 +191,7 @@ public class TiendaControlador
 
             prod.setStock(prod.getStock() - cant);
             System.out.println("venta fiada registrada correctamente");
+            guardarCreditosEnArchivo();
         }
         else
         {
@@ -199,9 +199,7 @@ public class TiendaControlador
         }
     }
 
-    // ==============================
-    // VER FIADOS
-    // ==============================
+    
     public void verFiados()
     {
         System.out.println("lista de clientes con productos fiados:");
@@ -220,9 +218,7 @@ public class TiendaControlador
         }
     }
 
-    // ==============================
-    // PAGAR CUENTA
-    // ==============================
+    
     public void pagarCuenta()
     {
         System.out.print("ingrese dni del cliente: ");
@@ -251,6 +247,7 @@ public class TiendaControlador
             cli.registrarPago(deuda);
             cli.getCreditos().clear();
             System.out.println("cuenta cancelada correctamente");
+            guardarCreditosEnArchivo();
         }
         else
         {
@@ -258,22 +255,46 @@ public class TiendaControlador
         }
     }
 
-    // ==============================
-    // REPORTE INVENTARIO
-    // ==============================
+    
     public void reporteInventario()
     {
         double total = 0;
-        for(Producto p : lista_productos)
+        try
         {
-            total += (p.getPrecio() * p.getStock());
+            java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("reporte_inventario.txt", true));
+
+            java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String fecha = dtf.format(java.time.LocalDateTime.now());
+
+            writer.println("=========================================");
+            writer.println("REPORTE DE INVENTARIO - TIENDITA SANCHEZ");
+            writer.println("Fecha: " + fecha);
+            writer.println("-----------------------------------------");
+
+            for(Producto p : lista_productos)
+            {
+                double subtotal = p.getPrecio() * p.getStock();
+                total += subtotal;
+                writer.println("Codigo: " + p.getCodigo() + " | Nombre: " + p.getNombre() +
+                        " | Precio: " + p.getPrecio() + " | Stock: " + p.getStock() +
+                        " | Subtotal: " + subtotal);
+            }
+
+            writer.println("-----------------------------------------");
+            writer.println("Valor total del inventario: " + total);
+            writer.println("=========================================");
+            writer.println();
+            writer.close();
+
+            System.out.println("reporte de inventario guardado correctamente");
         }
-        System.out.println("valor total del inventario: " + total);
+        catch(Exception e)
+        {
+            System.out.println("error al guardar reporte");
+        }
     }
 
-    // ==============================
-    // BUSCAR PRODUCTO / CLIENTE
-    // ==============================
+    
     public Producto buscarProducto(String codigo)
     {
         for(Producto p : lista_productos)
@@ -310,11 +331,92 @@ public class TiendaControlador
         return null;
     }
 
-    // ==============================
-    // LIMPIAR PANTALLA (SIMULADO)
-    // ==============================
+    
     public void limpiarPantalla()
     {
         System.out.println("\n\n\n\n\n\n\n\n\n\n");
+    }
+
+    public void guardarProductosEnArchivo()
+    {
+        try
+        {
+            java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("productos.txt"));
+            for(Producto p : lista_productos)
+            {
+                writer.println("-----------------------------------------");
+                writer.println("Codigo: " + p.getCodigo());
+                writer.println("Nombre: " + p.getNombre());
+                writer.println("Precio: " + p.getPrecio());
+                writer.println("Stock: " + p.getStock());
+                writer.println("Fecha de registro: " + p.getFechaRegistro());
+                writer.println("-----------------------------------------");
+                writer.println();
+            }
+            writer.close();
+            System.out.println("productos guardados correctamente en productos.txt");
+        }
+        catch(Exception e)
+        {
+            System.out.println("error al guardar productos");
+        }
+    }
+
+    public void guardarCreditosEnArchivo()
+    {
+        try
+        {
+            java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("creditos.txt"));
+            for(Cliente cli : lista_clientes)
+            {
+                if(cli.getDeudaTotal() > 0)
+                {
+                    for(Credito c : cli.getCreditos())
+                    {
+                        writer.println("-----------------------------------------");
+                        writer.println("DNI: " + cli.getDni());
+                        writer.println("Nombre: " + cli.getNombre());
+                        writer.println("Direccion: " + cli.getDireccion());
+                        writer.println("Telefono: " + cli.getTelefono());
+                        writer.println("Producto: " + c.getNombreProducto());
+                        writer.println("Codigo producto: " + c.getCodigoProducto());
+                        writer.println("Monto fiado: " + c.getMonto());
+                        writer.println("-----------------------------------------");
+                        writer.println();
+                    }
+                }
+            }
+            writer.close();
+            System.out.println("creditos guardados correctamente en creditos.txt");
+        }
+        catch(Exception e)
+        {
+            System.out.println("error al guardar creditos");
+        }
+    }
+
+    public void cargarProductosDesdeArchivo()
+    {
+        try
+        {
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader("productos.txt"));
+            String linea;
+            while((linea = reader.readLine()) != null)
+            {
+                String[] partes = linea.split(";");
+                Producto p = new Producto();
+                p.setCodigo(partes[0]);
+                p.setNombre(partes[1]);
+                p.setPrecio(Double.parseDouble(partes[2]));
+                p.setStock(Integer.parseInt(partes[3]));
+                lista_productos.add(p);
+            }
+            reader.close();
+            System.out.println("productos cargados desde archivo");
+        }
+        catch(Exception e)
+        {
+            System.out.println("no se encontraron productos guardados");
+        }
     }
 }

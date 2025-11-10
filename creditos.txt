@@ -1,0 +1,10 @@
+-----------------------------------------
+DNI: 75316903
+Nombre: Omar
+Direccion: Av dinamarca 345
+Telefono: 978958004
+Producto: leche gloria
+Codigo producto: 123
+Monto fiado: 5.0
+-----------------------------------------
+

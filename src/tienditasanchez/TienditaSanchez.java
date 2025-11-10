@@ -15,8 +15,9 @@ public class TienditaSanchez {
      */
     public static void main(String[] args) 
     {
-        TiendaControlador control = new TiendaControlador();
-        control.menu();
+       TiendaControlador control = new TiendaControlador();
+       control.cargarProductosDesdeArchivo();
+       control.menu();
     }
     
 }
